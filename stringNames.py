@@ -1,6 +1,6 @@
 # Basic Info
 """
-This script is a generator for the language pack: t.me/setlanguage/stringnames
+This script is a generator for the language pack: t.me/setlanguage/tokenstringnames
 It supports Telegram translation files of type .xml and .strings
 >--		Head over to t.me/TranslationTools for more tools 		--<
 """
@@ -18,6 +18,8 @@ skipped = list()
 
 # RegExps
 req_quotes = re.compile(r"\\'.*\\'.*HH:mm")  # \'Sample Text\' HH:mm
+TOKENS = re.compile(
+	r'%(?:\d+\$)?\.?\d*[%@sdf]|\{[A-Za-z0-9_]+\}|\[\/?[A-Za-z]\]|\bun\d\b')
 
 
 def isXML(file):
@@ -73,7 +75,22 @@ def XMLreplace(file=str, folder=None):
 			continue
 		string.text = "dummyText"
 		"""
-		if(req_quotes.match(string.text) != None):  # strings that require "quotes"
+		if TOKENS.search(string.text) != None:
+			if(req_quotes.match(string.text) != None):  # strings that require "quotes"
+				quotes = True
+			else:
+				quotes = False
+			temp = string_name
+			string.text = unescape(string.text)
+			for tok in TOKENS.finditer(string.text):
+				temp += ' '+tok[0]
+			string.text = temp
+			string.text = escape(string.text)
+			if quotes:
+				string.text = req_quotes.sub(
+					("\\'{}\\'").format(string_name), string.text)
+			del temp
+		elif(req_quotes.match(string.text) != None):  # strings that require "quotes"
 			string.text = req_quotes.sub(
 				("\\'{}\\'").format(string_name), string.text)
 		else:
@@ -82,8 +99,8 @@ def XMLreplace(file=str, folder=None):
 			print('\n'+str(strCount)+'. '+string_name+'')
 		strCount += 1
 	outFile = str(re.sub(r'(android_x|android)(.*)\.xml',
-						 r'\1_stringnames.xml', os.path.basename(file)))
-	outFolder = 'stringnames (IMPORT)'
+						 r'\1_tokenstringnames.xml', os.path.basename(file)))
+	outFolder = 'stringnames (with_tokens)'
 	if folder is None:
 		try:
 			os.mkdir(outFolder)
@@ -119,8 +136,8 @@ def STRINGSreplace(file=str, folder=None):
 	print("----\nProcessing: ", path)
 	dot_strings = open(path, 'r').read()
 	outFile = re.sub(r'(tdesktop|macos|ios)(.*).strings',
-					 r'\1_stringnames.strings', os.path.basename(file))
-	outFolder = 'stringnames (IMPORT)'
+					 r'\1_tokenstringnames.strings', os.path.basename(file))
+	outFolder = 'stringnames (with_tokens)'
 	if folder is None:
 		try:
 			os.mkdir(outFolder)
@@ -136,16 +153,25 @@ def STRINGSreplace(file=str, folder=None):
 		except:
 			pass
 		outFile = os.path.join(outFolder, outFile)
-
 	new_strings = open(outFile, 'w', encoding='UTF-8')
 	new_strings.write(
-		'/*\nThis file was generated for importing into the t.me/setlanguage/stringnames language.\n*/\n')
+		'/*\nThis file was generated for importing into the t.me/setlanguage/tokenstringnames language.\n*/\n')
 	if args.p:
 		print('\nThese strings have been edited with their names:\n')
 	strCount = 0
 	for match in re.finditer(r'(?<!.)"(.*)"\s=\s"(.*)";\n', dot_strings):
 		strName = match.groups()[0]
-		new_strings.write("\""+strName+"\" = \""+strName+"\";\n")
+		strText = match.groups()[1]
+		strText = unescape(strText)
+		if TOKENS.search(strText) != None:
+			temp = strName
+			for tok in TOKENS.finditer(strText):
+				temp += ' '+tok[0]
+			strText = temp
+			new_strings.write("\""+strName+"\" = \""+strText+"\";\n")
+			del temp
+		else:
+			new_strings.write("\""+strName+"\" = \""+strName+"\";\n")
 		if(args.p):
 			print('\n'+str(strCount)+'. '+strName+'')
 		strCount += 1
@@ -154,6 +180,40 @@ def STRINGSreplace(file=str, folder=None):
 	""" MEMORY CLEANUP  """
 	re.purge()
 	del dot_strings, strCount, outFile, new_strings
+
+
+def escape(string):
+	r"""Escape the given string so it can be included in double-quoted
+	strings, like in ``PO`` files.
+	>>> escape('Say:\n  \"hello, world!\"\n')
+	'Say:\\n  \\"hello, world!\\"\\n'
+	:param string: the string to escape
+	"""
+	return '%s' % string.replace('\\', '\\\\') \
+		.replace('\t', '\\t') \
+		.replace('\r', '\\r') \
+		.replace('\n', '\\n') \
+		.replace('\"', '\\"')
+
+
+def unescape(string):
+	r"""Reverse `escape` the given string.
+	>>> unescape('"Say:\\n  \\"hello, world!\\"\\n"')
+	'Say:\n  \"hello, world!\"\n'
+	<BLANKLINE>
+	:param string: the string to unescape
+	"""
+	def replace_escapes(match):
+		m = match.group(1)
+		if m == 'n':
+			return '\n'
+		elif m == 't':
+			return '\t'
+		elif m == 'r':
+			return '\r'
+		# m is \ or "
+		return m
+	return re.compile(r'\\([\\trn"])').sub(replace_escapes, string)
 
 
 def stringnames(file=str, folder=None):
