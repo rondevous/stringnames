@@ -234,11 +234,12 @@ def stringnames(file=str, folder=None):
 
 # Command-line info and argument parsing
 arg_parser = argparse.ArgumentParser(
-	description='Overwrites translations with their string-names using exported files from https://translations.telegram.org/en')
-arg_parser.add_argument(
+	description='Replaces translation texts with their identifiers (stringnames) using files exported from https://translations.telegram.org')
+inputgroup = arg_parser.add_mutually_exclusive_group(required=True)
+inputgroup.add_argument(
 	'-f', '--file', metavar='language[ .xml | .strings]', type=str, required=False,
 	help='The exported language file (.xml or .strings) from the translations platform')
-arg_parser.add_argument(
+inputgroup.add_argument(
 	'-d', '--folder', metavar='folder', type=str, required=False,
 	help='The folder in which the exported language files are placed in.')
 arg_parser.add_argument(
@@ -256,7 +257,8 @@ if args.folder is None:
 			\n\t\t\tOR\
 			\n\tpython stringNames --folder langfiles")
 	else:
-		stringnames(str(args.file))  # str('android_lang_v1234567.xml')
+		folder, file = os.path.split(str(args.file))
+		stringnames(file, folder)  # str('android_lang_v1234567.xml')
 else:
 	folder = str(args.folder)
 	if os.path.isdir(folder):
@@ -266,11 +268,6 @@ else:
 			path = os.path.join(folder, file)
 			if os.path.isfile(path):
 				stringnames(file, folder)
-				time.sleep(1)
-			else:
-				continue
+				time.sleep(1) # delay for show-off
 	else:
 		print('Not a folder ')
-
-# begin
-# stringnames()
