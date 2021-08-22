@@ -18,8 +18,14 @@ skipped = list()
 
 # RegExps
 req_quotes = re.compile(r"\\'.*\\'.*HH:mm")  # \'Sample Text\' HH:mm
-TOKENS = re.compile(
-	r'%(?:\d+\$)?\.?\d*[%@sdf]|\{[A-Za-z0-9_]+\}|\[\/?[A-Za-z]\]|\bun\d\b')
+
+# use re.finditer instead of re.findall for this, since a capturing group is present
+TOKENS = re.compile(r'%(\d+\$)?\.?\d*[%@sdf]|\{[A-Za-z0-9_]+\}|\bun\d\b')
+
+# This TDesktop token may not be in use anymore (unconfirmed)
+TokensExtraTDesktop = r'\[a href=".*"\]|\[\/?[A-Za-z]\]'
+# This android token may not be in use anymore (unconfirmed)
+TokensExtraAndroid = r'(<!\[CDATA\[)?<a href=".*">|<\/a>(\]\]>)?'
 
 
 def isXML(file):
@@ -268,6 +274,6 @@ else:
 			path = os.path.join(folder, file)
 			if os.path.isfile(path):
 				stringnames(file, folder)
-				time.sleep(1) # delay for show-off
+				time.sleep(1)  # delay for show-off
 	else:
 		print('Not a folder ')
