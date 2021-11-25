@@ -3,8 +3,7 @@ This script will generate translation files with all the translations set as its
 
 ### If you want to generate the string-name along with the tokens present in the translation, use the [addTokens](https://github.com/rondevous/stringnames/tree/addTokens) branch
 
-*Requires: Python 3*
-Export the translation files for each of the telegram apps and place them in a folder
+Export the translation files you need from https://translations.telegram.org/en
 
 **To generate from within a folder**
 ```
