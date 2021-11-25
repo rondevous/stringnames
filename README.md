@@ -1,46 +1,18 @@
+## Generate telegram translations as the string-name
+This script will generate translation files with all the translations set as its corresponding string-name. https://translations.telegram.org/stringnames has been created if you need to use it.
 
-# String Names Generator
-**This script will generate files for the Telegram [stringnames](t.me/setlanguage/stringnames) language**
+### If you want to generate the string-name along with the tokens present in the translation, use the [addTokens](https://github.com/rondevous/stringnames/tree/addTokens) branch
 
-### Requirements:
-1. Download and Install [Python-3](https://www.python.org/downloads), linux users can install it from their pkg repo (please don't use python-2)
+*Requires: Python 3*
+Export the translation files for each of the telegram apps and place them in a folder
 
-### Preparations:
-1. Download [stringNames.py](https://github.com/rondevous/stringnames/raw/master/stringNames.py)
-_(right click > Save link as)_
-2. Export the language files of each app from https://translations.telegram.org/en
-3. Place them all into a new folder
-
-## Run the script
-[Open command prompt/terminal](https://github.com/rondevous/stringnames#opening-command-prompt--terminal)
-
-Navigate the terminal to the folder where the script is placed
-
-`Tip: Press Tab to auto-complete the folder name`
-```
-cd path/to/stringNames/script
-```
-
-**And generate them all at once!** \\(^-^)/
+**To generate from within a folder**
 ```
 python stringNames.py --folder langfiles
 ```
-If `langfiles` is the folder where you saved all your exported files.
+If `langfiles` is the folder where you saved all the exported language files.
 
-**Or do it one at a time** ¯\\\_(ツ)\_/¯
+**To generate one file only**
 ```
-$ python stringNames.py --file ios_en_v567890.strings
+python stringNames.py --file ios_en_v567890.strings
 ```
-
-**Some info**
-```
-$ python stringNames.py -h
-```
-
-### How to open the Terminal/Command Prompt 
-- In Windows: type `cmd.exe` in the folder's address bar. (or simply open the prompt and enter: `cd path\to\folder`)
-- In Linux: right-click in the file manager or else: `cd path/to/folder`
-
-## More tools and support for Telegram Translators
-Join us in the group [Translation Platform Tools](https://t.me/translationtools/5), we have tools! 
-
