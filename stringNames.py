@@ -22,11 +22,13 @@ req_quotes = re.compile(r"\\'.*\\'.*HH:mm")  # \'Sample Text\' HH:mm
 # use re.finditer instead of re.findall for this, since a capturing group is present
 TOKENS = re.compile(r'%(\d+\$)?\.?\d*[%@sdf]|\{[A-Za-z0-9_]+\}|\bun\d\b')
 
-# This TDesktop token may not be in use anymore (unconfirmed)
-TokensExtraTDesktop = r'\[a href=".*"\]|\[\/?[A-Za-z]\]'
-# This android token may not be in use anymore (unconfirmed)
-TokensExtraAndroid = r'(<!\[CDATA\[)?<a href=".*">|<\/a>(\]\]>)?'
+# TDesktop Markup tokens, needing to enclose one or more text entities
+TokensExtraTDesktop = re.compile(r'\[a href=\".*\"\]|\[\/?[A-Za-z]\]')
 
+# Android Markup tokens, needing to enclose one or more text entities
+TokensExtraAndroid = re.compile(r'<!\[CDATA\[(?:<a href=\")?.*">|(?:<\/a>)?\]\]>')
+# results in a pair-match
+# let href='' hold the same old value
 
 def isXML(file):
 	"""Checks if a file is in .XML format
@@ -81,7 +83,18 @@ def XMLreplace(file=str, folder=None):
 			continue
 		string.text = "dummyText"
 		"""
-		if TOKENS.search(string.text) != None:
+		if TokensExtraAndroid.search(string.text) != None:
+			tokensExtra = TokensExtraAndroid.findall(string.text)
+			extralen = len(tokensExtra) # these are pairs, so always even number
+			newstring = ""
+			for x in range(0, int(extralen/2)):
+				newstring += tokensExtra.pop(0) + string_name + tokensExtra.pop(0) + ' '
+			if TOKENS.search(string.text) != None:
+				string.text = unescape(string.text)
+				for tok in TOKENS.finditer(string.text):
+					newstring += ' '+tok[0]
+			string.text = escape(newstring)
+		elif TOKENS.search(string.text) != None:
 			if(req_quotes.match(string.text) != None):  # strings that require "quotes"
 				quotes = True
 			else:
@@ -169,7 +182,18 @@ def STRINGSreplace(file=str, folder=None):
 		strName = match.groups()[0]
 		strText = match.groups()[1]
 		strText = unescape(strText)
-		if TOKENS.search(strText) != None:
+		if TokensExtraTDesktop.search(strText) != None:
+			tokensExtra = TokensExtraTDesktop.findall(strText)
+			extralen = len(tokensExtra) # these are pairs, so always even number
+			newtxt = ""
+			for x in range(0, int(extralen/2)):
+				newtxt += tokensExtra.pop(0) + strName + tokensExtra.pop(0) + ' '
+			if TOKENS.search(strText) != None:
+				for tok in TOKENS.finditer(strText):
+					newtxt += ' '+tok[0]
+			strText = escape(newtxt)
+			new_strings.write("\""+strName+"\" = \""+strText+"\";\n")
+		elif TOKENS.search(strText) != None:
 			temp = strName
 			for tok in TOKENS.finditer(strText):
 				temp += ' '+tok[0]
