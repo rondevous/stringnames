@@ -18,7 +18,17 @@ TOKEN_REGEX = re.compile("%(?:\\d+\\$)?\\.?\\d*[%@sdf]|\\{[A-Za-z0-9_]+\\}|\\[\\
 ```regex
 \bun\d\b
 %(\d+\$)?\d*[%@sdf]
-\[CDATA\[<a href=\"|\">|<\/a>\]\]>
+<!\[CDATA\[<a href=\"|\">|<\/a>\]\]>
+```
+
+> Extra tokens not yet handled by translations website
+```regex
+<!\[CDATA\[(<a href=\")?|\]\]>
+```
+
+> Markup tokens:
+```
+<!\[CDATA\[(<a href=\")?|\">|(<\/a>)?\]\]>
 ```
 
 2. Matching tokens of **Telegram-X**
@@ -41,5 +51,11 @@ TOKEN_REGEX = re.compile("%(?:\\d+\\$)?\\.?\\d*[%@sdf]|\\{[A-Za-z0-9_]+\\}|\\[\\
 ```regex
 \{[A-Za-z0-9_]+\}
 \[\/?[A-Za-z]\]
-\[a href=\"|\"\] 
+\[a href=\"|\"\]
+```
+
+> Token Pairs used above
+```
+\[CDATA\[<a href=\"|\">|<\/a>\]\]>
+\[a href=\"|\"\]
 ```
