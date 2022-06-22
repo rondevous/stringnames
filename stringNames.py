@@ -19,6 +19,13 @@ skipped = list()
 # RegExps
 req_quotes = re.compile(r"\\'.*\\'.*HH:mm")  # \'Sample Text\' HH:mm
 
+# TDesktop Markup tokens, needing to enclose one or more text entities
+TokensExtraTDesktop = re.compile(r'\[a href=\".*\"\]|\[\/?[A-Za-z]\]')
+
+# Android Markup tokens, needing to enclose one or more text entities
+TokensExtraAndroid = re.compile(r'<!\[CDATA\[(?:<a href=\")?.*">|(?:<\/a>)?\]\]>')
+# results in a pair-match
+# let href='' hold the same old value
 
 def isXML(file):
 	"""Checks if a file is in .XML format
@@ -73,7 +80,14 @@ def XMLreplace(file=str, folder=None):
 			continue
 		string.text = "dummyText"
 		"""
-		if(req_quotes.match(string.text) != None):  # strings that require "quotes"
+		if TokensExtraAndroid.search(string.text) != None:
+			tokensExtra = TokensExtraAndroid.findall(string.text)
+			extralen = len(tokensExtra) # these are pairs, so always even number
+			newstring = ""
+			for x in range(0, int(extralen/2)):
+				newstring += tokensExtra.pop(0) + string_name + tokensExtra.pop(0) + ' '
+			string.text = escape(newstring)
+		elif(req_quotes.match(string.text) != None):  # strings that require "quotes"
 			string.text = req_quotes.sub(
 				("\\'{}\\'").format(string_name), string.text)
 		else:
@@ -145,7 +159,18 @@ def STRINGSreplace(file=str, folder=None):
 	strCount = 0
 	for match in re.finditer(r'(?<!.)"(.*)"\s=\s"(.*)";\n', dot_strings):
 		strName = match.groups()[0]
-		new_strings.write("\""+strName+"\" = \""+strName+"\";\n")
+		strText = match.groups()[1]
+		strText = unescape(strText)
+		if TokensExtraTDesktop.search(strText) != None:
+			tokensExtra = TokensExtraTDesktop.findall(strText)
+			extralen = len(tokensExtra) # these are pairs, so always even number
+			newtxt = ""
+			for x in range(0, int(extralen/2)):
+				newtxt += tokensExtra.pop(0) + strName + tokensExtra.pop(0) + ' '
+			strText = escape(newtxt)
+			new_strings.write("\""+strName+"\" = \""+strText+"\";\n")
+		else:
+			new_strings.write("\""+strName+"\" = \""+strName+"\";\n")
 		if(args.p):
 			print('\n'+str(strCount)+'. '+strName+'')
 		strCount += 1
@@ -154,6 +179,40 @@ def STRINGSreplace(file=str, folder=None):
 	""" MEMORY CLEANUP  """
 	re.purge()
 	del dot_strings, strCount, outFile, new_strings
+
+
+def escape(string):
+	r"""Escape the given string so it can be included in double-quoted
+	strings, like in ``PO`` files.
+	>>> escape('Say:\n  \"hello, world!\"\n')
+	'Say:\\n  \\"hello, world!\\"\\n'
+	:param string: the string to escape
+	"""
+	return '%s' % string.replace('\\', '\\\\') \
+		.replace('\t', '\\t') \
+		.replace('\r', '\\r') \
+		.replace('\n', '\\n') \
+		.replace('\"', '\\"')
+
+
+def unescape(string):
+	r"""Reverse `escape` the given string.
+	>>> unescape('"Say:\\n  \\"hello, world!\\"\\n"')
+	'Say:\n  \"hello, world!\"\n'
+	<BLANKLINE>
+	:param string: the string to unescape
+	"""
+	def replace_escapes(match):
+		m = match.group(1)
+		if m == 'n':
+			return '\n'
+		elif m == 't':
+			return '\t'
+		elif m == 'r':
+			return '\r'
+		# m is \ or "
+		return m
+	return re.compile(r'\\([\\trn"])').sub(replace_escapes, string)
 
 
 def stringnames(file=str, folder=None):
@@ -208,6 +267,6 @@ else:
 			path = os.path.join(folder, file)
 			if os.path.isfile(path):
 				stringnames(file, folder)
-				time.sleep(1) # delay for show-off
+				time.sleep(1)  # delay for show-off
 	else:
 		print('Not a folder ')

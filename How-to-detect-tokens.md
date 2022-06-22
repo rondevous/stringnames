@@ -1,7 +1,7 @@
 # How to detect tokens in Telegram Translations
 The following regular expression (regEx) was taken directly from https://translations.telegram.org (Look for 'TOKEN_REGEX' in __translations.js__ via the browser debugger). This regex will match the tokens present in translations of telegram apps.
 
-- ### In **Javascript**, as it is now:
+- ### In **Javascript**, as it is on the translations website:
 ```javascript
 var TOKEN_REGEX = new RegExp('%(\\d+\\$)?\\.?\\d*[%@sdf]|\\{[A-Za-z0-9_]+\\}|\\[\\/?[A-Za-z]\\]|\\bun\\d\\b|&lt;!\\[CDATA\\[&lt;a href=&quot;|&quot;&gt;|&lt;\\/a&gt;\\]\\]&gt;|\\[a href=&quot;|&quot;\\]', 'g');
 ```
@@ -11,23 +11,16 @@ var TOKEN_REGEX = new RegExp('%(\\d+\\$)?\\.?\\d*[%@sdf]|\\{[A-Za-z0-9_]+\\}|\\[
 TOKEN_REGEX = re.compile("%(?:\\d+\\$)?\\.?\\d*[%@sdf]|\\{[A-Za-z0-9_]+\\}|\\[\\/?[A-Za-z]\\]|\\bun\\d\\b|<!\\[CDATA\\[<a href=\"|\">|<\\/a>\\]\\]>|\\[a href=\"|\"\\]")
 ```
 
-### To feed curiosity, I have broken down the (raw, unescaped) regex stolen directly from the translations website to match tokens of only specific Telegram apps:
+### For the sake of understanding, I have broken down the (raw, unescaped) regex taken directly from the translations website to match the tokens of specific Telegram apps:
 
 
-1. Matching tokens of **Telegram-Android**
+1. <u>Matching tokens of **Telegram-Android**</u>
 ```regex
 \bun\d\b
 %(\d+\$)?\d*[%@sdf]
-<!\[CDATA\[<a href=\"|\">|<\/a>\]\]>
 ```
-
-> Extra tokens not yet handled by translations website
+> <u>Android Markup tokens, needing to enclose one or more text entities:</u>
 ```regex
-<!\[CDATA\[(<a href=\")?|\]\]>
-```
-
-> Markup tokens:
-```
 <!\[CDATA\[(<a href=\")?|\">|(<\/a>)?\]\]>
 ```
 
@@ -36,26 +29,23 @@ TOKEN_REGEX = re.compile("%(?:\\d+\\$)?\\.?\\d*[%@sdf]|\\{[A-Za-z0-9_]+\\}|\\[\\
 %(\d+\$)?\d*[%@sdf]
 ```
 
-3. Matching tokens of **iOS**
+3. Matching tokens of **Telegram iOS**
 ```regex
 %(\d+\$)?\.?\d*[%@sdf]
 \{[A-Za-z0-9_]+\}
 ```
 
-4. Matching tokens of **MacOS**
+4. Matching tokens of **Telegram MacOS**
 ```regex
 %(\d+\$)?\d*[%@sdf]
 ```
 
-5. Matching tokens of **TDesktop**
+5. Matching tokens of **Telegram Desktop**
 ```regex
 \{[A-Za-z0-9_]+\}
-\[\/?[A-Za-z]\]
-\[a href=\"|\"\]
 ```
 
-> Token Pairs used above
-```
-\[CDATA\[<a href=\"|\">|<\/a>\]\]>
-\[a href=\"|\"\]
+> <u>TDesktop Markup tokens, needing to enclose one or more text entities:</u>
+```regex
+\[a href=\"|\"\]|\[\/?[A-Za-z]\]
 ```
