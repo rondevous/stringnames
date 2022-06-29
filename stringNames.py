@@ -83,35 +83,37 @@ def XMLreplace(file=str, folder=None):
 			continue
 		string.text = "dummyText"
 		"""
-		if TokensExtraAndroid.search(string.text) != None:
-			tokensExtra = TokensExtraAndroid.findall(string.text)
+		# convert string.text to str() before applying any re ops on it, or there will be type errors when passing None.
+		# blame AllNPhotos_one for this
+		if TokensExtraAndroid.search(str(string.text)) != None:
+			tokensExtra = TokensExtraAndroid.findall(str(string.text))
 			extralen = len(tokensExtra) # these are pairs, so always even number
 			newstring = ""
 			for x in range(0, int(extralen/2)):
 				newstring += tokensExtra.pop(0) + string_name + tokensExtra.pop(0) + ' '
-			if TOKENS.search(string.text) != None:
+			if TOKENS.search(str(string.text)) != None:
 				string.text = unescape(string.text)
 				for tok in TOKENS.finditer(string.text):
 					newstring += ' '+tok[0]
 			string.text = escape(newstring)
-		elif TOKENS.search(string.text) != None:
-			if(req_quotes.match(string.text) != None):  # strings that require "quotes"
+		elif TOKENS.search(str(string.text)) != None:
+			if(req_quotes.match(str(string.text)) != None):  # strings that require "quotes"
 				quotes = True
 			else:
 				quotes = False
 			temp = string_name
 			string.text = unescape(string.text)
-			for tok in TOKENS.finditer(string.text):
+			for tok in TOKENS.finditer(str(string.text)):
 				temp += ' '+tok[0]
 			string.text = temp
 			string.text = escape(string.text)
 			if quotes:
 				string.text = req_quotes.sub(
-					("\\'{}\\'").format(string_name), string.text)
+					("\\'{}\\'").format(string_name), str(string.text))
 			del temp
-		elif(req_quotes.match(string.text) != None):  # strings that require "quotes"
+		elif(req_quotes.match(str(string.text)) != None):  # strings that require "quotes"
 			string.text = req_quotes.sub(
-				("\\'{}\\'").format(string_name), string.text)
+				("\\'{}\\'").format(string_name), str(string.text))
 		else:
 			string.text = string_name
 		if(args.p):
