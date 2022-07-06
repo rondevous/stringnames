@@ -11,7 +11,7 @@
 1. Download [stringNames.py](https://github.com/rondevous/stringnames/raw/master/stringNames.py)
 _(right click > Save link as)_
 2. Export the language files of each app from https://translations.telegram.org/en
-3. Place all the languages files all into a new folder (langfiles). And keep this folder beside stringNames.py
+3. Place all the languages files into a new folder (langfiles). And keep this folder beside stringNames.py
 
 ## Run the script
 In the command prompt/ terminal, go to the folder where the script is:
