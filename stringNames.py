@@ -20,10 +20,10 @@ skipped = list()
 req_quotes = re.compile(r"\\'.*\\'.*HH:mm")  # \'Sample Text\' HH:mm
 
 # TDesktop Markup tokens, needing to enclose one or more text entities
-TokensExtraTDesktop = re.compile(r'\[a href=\".*\"\]|\[\/?[A-Za-z]\]')
+TokensExtraTDesktop = re.compile(r'\[a href=\".*?\"\]|\[\/?[A-Za-z]\]')
 
 # Android Markup tokens, needing to enclose one or more text entities
-TokensExtraAndroid = re.compile(r'<!\[CDATA\[(?:<a href=\")?.*">|(?:<\/a>)?\]\]>')
+TokensExtraAndroid = re.compile(r'<!\[CDATA\[<a href=\".*?">|<\/a>\]\]>')
 # results in a pair-match
 # let href='' hold the same old value
 
@@ -159,7 +159,7 @@ def STRINGSreplace(file=str, folder=None):
 	if args.p:
 		print('\nThese strings have been edited with their names:\n')
 	strCount = 0
-	for match in re.finditer(r'(?<!.)"(.*)"\s=\s"(.*)";\n', dot_strings):
+	for match in re.finditer(r'(?<!.)"(.*?)"\s=\s"(.*)";\n', dot_strings):
 		strName = match.groups()[0]
 		strText = match.groups()[1]
 		strText = unescape(strText)
