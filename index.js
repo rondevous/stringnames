@@ -117,8 +117,19 @@ function processStrings (file, filename) {
     text = reader.result
     options = getOptions() // get chosen options
     console.log(options[0], options[1])
-    for (let matches of text.matchAll(/(?<!.)"(.*?)"[ ]*=[ ]*"([^;]*?)";\n/g)) { 
-      // use [^] instead of . to match line terminators because of MacOS strings like 'EmptyChat.Stickers.Desc'
+    textCopy = text
+    for (let matchedcomment of textCopy.matchAll(/[\/* ]+"(.*?)"[ ]*=[ ]*"([^]+?)";/g)) { 
+      // Remove commented "key"="values"; which are mostly likely written again uncommented in the same text later
+      // has no effect on iOS because it doesn't have commented key-values
+      // at the beginning of the line
+      text = text.replace(matchedcomment[0], '')
+    }
+    textCopy = text
+    for (let matches of textCopy.matchAll(/(?<!.)"(.*?)"[ ]*=[ ]*"([^]*?)";/g)) { 
+      // don't use /n at the end, because iOS has comments on the same line of string
+      // use [^] instead of . to match line terminators because of MacOS strings like 'EmptyChat.Stickers.Desc'; 'SecureId.CreatePassword.Description'
+      // Note: some strings aren't matched for some reason? LogoutOptions.ContactSupportText; LogoutOptions.clearcachetext
+      // ChatList.Context.PinError; Chat.Service.SecretChat.DisabledTimer
       line = matches[0]
       stringName = matches[1]
       stringText = matches[2]
@@ -144,28 +155,32 @@ function processStrings (file, filename) {
               textstring += ' ' + tok
             }
           }
-          text = text.replace(line, '"'+stringName+'" = "'+ textstring +'";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+ textstring +'";')
         } else if (stringText.match(TOKENS) !== null) {
           for (let tok of stringText.match(TOKENS)) {
             textstring += ' ' + tok
           }
-          text = text.replace(line, '"'+stringName+'" = "'+ value + textstring +'";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+ value + textstring +'";')
         } else if (stringText.match(requireQuotes) !== null) {
           textstring = "\\'" + value + "\\' HH:mm"
-          text = text.replace(line, '"'+stringName+'" = "'+ textstring +'";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+ textstring +'";')
         } else {
-          text = text.replace(line, '"'+stringName+'" = "'+ value + '";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+ value + '";')
         }
       } else {
         // don't preserve tokens
         if (typeof options[1] === 'string') {
-          text = text.replace(line, '"'+stringName+'" = "'+ options[1] +'";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+ options[1] +'";')
         } else if (options[1] === true) {
-          text = text.replace(line, '"'+stringName+'" = "'+ Math.random() +'";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+ Math.random() +'";')
         } else if (options[1] === false) {
-          text = text.replace(line, '"'+stringName+'" = "'+stringName+'";\n')
+          text = text.replace(line, '"'+stringName+'" = "'+stringName+'";')
         }
       }
+      // if (stringName === "Chat.Service.SecretChat.DisabledTimer") {
+      //   console.log(matches[0])
+      //   // break;
+      // }
     }
     if (options[0]) {
       filename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_StringnamesTokens.strings')
