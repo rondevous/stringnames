@@ -192,13 +192,13 @@ function myFunction () {
       for (let i = 0; i < x.files.length; i++) {
         let file = x.files[i];
         if ('name' in file) {
-          txt += "<br><strong>" + file.name + "</strong><br>";
+          txt += "<br><strong><code>" + file.name + "</code></strong><br>";
         }
         if ('size' in file) {
-          txt += "size: " + Math.round(file.size / 1024) + " KiB<br>";
+          txt += "<strong><code>size: " + Math.round(file.size / 1024) + " KiB</code></strong><br>";
         }
         if ('type' in file) {
-          txt += " type: " + file.type;
+          txt += "<strong><code>type: " + file.type + '</code></strong><br>';
         }
 
         if (file.type === 'text/xml') {

@@ -33,14 +33,24 @@
           transform: scale(1.5); 
         }
         #CheckOptions {
+          max-width: fit-content;
           /* border: 1px double black; */
           /* display: block; */
+        }
+        p#demo {
+          font-size: 1.1em;
         }
         .form-control {
           font-family: system-ui, sans-serif;
           font-size: 1.5em;
           display: grid;
           grid-template-columns: 1em auto;
+          gap: 0.5em;
+        }
+        .checkbox-control > input {
+          font-family: system-ui, sans-serif;
+          font-size: 1.2em;
+          display: grid;
           gap: 0.5em;
         }
       </style>
@@ -51,6 +61,8 @@
     <p>Currently accepted translation files are of type <code>.xml</code> and <code>.strings</code></p>
     
     <div id="CheckOptions">
+    <fieldset>
+    <legend>Choose an option</legend>
       <label class="form-control">
         <input type="radio" value="default" name="stringvalue" checked aria-checked="true" onclick="document.querySelector('#onevalue').disabled=true">
         (default) string-name as translation
@@ -63,18 +75,19 @@
         <input type="radio" value="onevalueradio" name="stringvalue" onclick="document.querySelector('#onevalue').disabled=false">
         One value for all strings
       </label>
-      <label>
+      <label class="checkbox-control">
         <input type="text" id="onevalue" value="EEEEEE" placeholder="EEEEEE" disabled><br> <!-- show textbox with radio for input -->
       </label>
+    </fieldset>
       <label class="form-control">
         <input type="checkbox" id="preservetokens">
         Keep Tokens
       </label><br>
+      <label class="file-input">
+        <input type="file" id="myFile" multiple accept=".xml, .strings" onchange="myFunction()">
+        Choose files to generate
+      </label>
     </div>
-    <label class="file-input">
-      <input type="file" id="myFile" multiple accept=".xml, .strings" onchange="myFunction()">
-      Choose files to generate
-    </label>
     
     <p id="demo"></p>
     <a href='#' id='saveFiles'></a>
