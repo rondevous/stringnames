@@ -11,6 +11,24 @@ const TOKENSpair = new RegExp('<!\\[CDATA\\[<a href=\\\\".*?\\\\">|<\\/a>\\]\\]>
 // results in an even number of matches (pairs)
 // use \\\\" (four backslashes before double quote) for properly matching \" in innerHTML.
 
+function prepareDownload (blob, filename, newfilename) {
+  var filesInDOM = document.getElementsByClassName('filename')
+  for (let ele of filesInDOM) {
+    if (ele.innerText === filename) {
+      var tag = document.createElement('a')
+      // Save to file, thanks: https://stackoverflow.com/a/24191504
+      tag.setAttribute('href', window.URL.createObjectURL(blob));
+      tag.setAttribute('download', newfilename);
+      tag.dataset.downloadurl = [blob.type, tag.download, tag.href].join(':');
+      // tag.innerHTML = ele.innerHTML
+      tag.innerHTML = "<strong><code>" + filename + " >>> " + newfilename + "</code></strong>"
+      ele.before(tag)
+      ele.remove()
+      tag.click()
+    }
+  }
+}
+
 function getOptions () {
   const preservetokens = document.querySelector('#preservetokens').checked
   const radios = document.getElementsByName('stringvalue')
@@ -95,17 +113,12 @@ function processXML (file, filename) {
     var xmlString = new XMLSerializer()
     xmlString = xmlString.serializeToString(xmlDoc); // XML to String
     if (options[0]) {
-      filename = filename.replace(/(android_x|android)(?:.*).xml/, '$1_StringnamesTokens.xml')
+      newfilename = filename.replace(/(android_x|android)(?:.*).xml/, '$1_stringnamesTokens.xml')
     } else {
-      filename = filename.replace(/(android_x|android)(?:.*).xml/, '$1_Stringnames.xml')
+      newfilename = filename.replace(/(android_x|android)(?:.*).xml/, '$1_stringnames.xml')
     }
-    let saveFiles = document.querySelector("#saveFiles")
-    // Save to file, thanks: https://stackoverflow.com/a/24191504
     var bb = new Blob([xmlString], { type: 'text/xml' });
-    saveFiles.setAttribute('href', window.URL.createObjectURL(bb));
-    saveFiles.setAttribute('download', filename);
-    saveFiles.dataset.downloadurl = ['text/xml', saveFiles.download, saveFiles.href].join(':');
-    saveFiles.click()
+    prepareDownload (bb, filename, newfilename)
   }
 }
 
@@ -118,15 +131,15 @@ function processStrings (file, filename) {
     options = getOptions() // get chosen options
     console.log(options[0], options[1])
     textCopy = text
+    // REQUIRED STEP: Remove comments containing key-value pairs
     for (let matchedcomment of textCopy.matchAll(/[\/* ]+"(.*?)"[ ]*=[ ]*"([^]+?)";/g)) { 
       // Remove commented "key"="values"; which are mostly likely written again uncommented in the same text later
-      // has no effect on iOS because it doesn't have commented key-values
-      // at the beginning of the line
+      // has no effect on iOS because it doesn't have commented key-values at the beginning of the line
       text = text.replace(matchedcomment[0], '')
     }
     textCopy = text
     for (let matches of textCopy.matchAll(/(?<!.)"(.*?)"[ ]*=[ ]*"([^]*?)";/g)) { 
-      // don't use /n at the end, because iOS has comments on the same line of string
+      // don't use \n at the end, because iOS has comments on the same line of string
       // use [^] instead of . to match line terminators because of MacOS strings like 'EmptyChat.Stickers.Desc'; 'SecureId.CreatePassword.Description'
       // Note: some strings aren't matched for some reason? LogoutOptions.ContactSupportText; LogoutOptions.clearcachetext
       // ChatList.Context.PinError; Chat.Service.SecretChat.DisabledTimer
@@ -183,17 +196,12 @@ function processStrings (file, filename) {
       // }
     }
     if (options[0]) {
-      filename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_StringnamesTokens.strings')
+      newfilename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_stringnamesTokens.strings')
     } else {
-      filename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_Stringnames.strings')
+      newfilename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_stringnames.strings')
     }
-    let saveFiles = document.querySelector("#saveFiles")
-    // Save to file, thanks: https://stackoverflow.com/a/24191504
     var bb = new Blob([text], { type: 'text/strings' });
-    saveFiles.setAttribute('href', window.URL.createObjectURL(bb));
-    saveFiles.setAttribute('download', filename);
-    saveFiles.dataset.downloadurl = ['text/strings', saveFiles.download, saveFiles.href].join(':');
-    saveFiles.click()
+    prepareDownload(bb, filename, newfilename)
   }
 }
 
@@ -204,10 +212,11 @@ function myFunction () {
     if (x.files.length === 0) {
       txt = "Select one or more files.";
     } else {
+      txt= "<br><code>If the file(s) does not automatically download, use the links below:</code  ><br>"
       for (let i = 0; i < x.files.length; i++) {
         let file = x.files[i];
         if ('name' in file) {
-          txt += "<br><strong><code>" + file.name + "</code></strong><br>";
+          txt += "<br><span class='filename'><strong><code>" + file.name + "</code></strong></span><br>";
         }
         if ('size' in file) {
           txt += "<strong><code>size: " + Math.round(file.size / 1024) + " KiB</code></strong><br>";
@@ -215,7 +224,6 @@ function myFunction () {
         if ('type' in file) {
           txt += "<strong><code>type: " + file.type + '</code></strong><br>';
         }
-
         if (file.type === 'text/xml') {
           // Process .xml
           processXML(file, file.name)

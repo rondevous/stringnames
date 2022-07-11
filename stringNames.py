@@ -48,7 +48,7 @@ def isStrings(file):
 		dot_strings = open(file, 'r', encoding='utf-8').read()
 	except:
 		return False
-	if len(re.findall(r'".*"\s=\s".*";', dot_strings)) > 0:
+	if len(re.findall(r'".*?"\s+=\s+".*?";', dot_strings)) > 0:
 		return True
 
 
