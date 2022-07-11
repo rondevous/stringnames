@@ -45,7 +45,7 @@ def isStrings(file):
 	"""
 	global dot_strings
 	try:
-		dot_strings = open(file, 'r').read()
+		dot_strings = open(file, 'r', encoding='utf-8').read()
 	except:
 		return False
 	if len(re.findall(r'".*"\s=\s".*";', dot_strings)) > 0:
@@ -133,7 +133,7 @@ def STRINGSreplace(file=str, folder=None):
 	global dot_strings, strCount, outFile
 	path = os.path.join(folder, file)
 	print("----\nProcessing: ", path)
-	dot_strings = open(path, 'r').read()
+	dot_strings = open(path, 'r', encoding='utf-8').read()
 	outFile = re.sub(r'(tdesktop|macos|ios)(.*).strings',
 					 r'\1_stringnames.strings', os.path.basename(file))
 	outFolder = 'stringnames (IMPORT)'
@@ -227,7 +227,7 @@ def stringnames(file=str, folder=None):
 	elif(isStrings(temp)):
 		STRINGSreplace(file, folder)
 	else:  # invalid translation file
-		print("\n\t[ ERROR ]: '" + file +
+		print("\n\t[ ERROR ]: '" + file + "'"+
 			  "\n This is not a valid translations file. Looking for .XML or .strings")
 		print("\nPlease export a translation file from one of the apps at https://translations.telegram.org/en")
 		print('How to export --> https://t.me/TranslationsTalk/1759)')  # FIXME

@@ -1,3 +1,8 @@
+# NOTE: USE THIS WEBSITE FROM NOW: https://rondevous.github.io/stringnames/
+The python script will not be updated, unless necessary. The website processes all the stringnames in your browser itself, so its fast :thumbsup:
+
+---
+
 ## Generate telegram language files with the keys/string-names as the translation
 
 This script will generate translation files with all the translations set as its corresponding key-name. https://translations.telegram.org/stringnames has been created if you need to use this.
