@@ -113,9 +113,15 @@ function processXML (file, filename) {
     var xmlString = new XMLSerializer()
     xmlString = xmlString.serializeToString(xmlDoc); // XML to String
     if (options[0]) {
-      newfilename = filename.replace(/(android_x|android)(?:.*).xml/, '$1_stringnamesTokens.xml')
+      newfilename = filename.replace(/([A-Za-z0-9_]+)_en_v(?:.*).xml/, '$1_stringnamesTokens.xml')
+      if (newfilename === filename) {
+        newfilename = filename.replace(/(.*).xml/, '$1_stringnamesTokens.xml') // just append at end
+      }
     } else {
-      newfilename = filename.replace(/(android_x|android)(?:.*).xml/, '$1_stringnames.xml')
+      newfilename = filename.replace(/([A-Za-z0-9_]+)_en_v(?:.*).xml/, '$1_stringnames.xml')
+      if (newfilename === filename) {
+        newfilename = filename.replace(/(.*).xml/, '$1_stringnames.xml') // just append at end
+      }
     }
     var bb = new Blob([xmlString], { type: 'text/xml' });
     prepareDownload (bb, filename, newfilename)
@@ -196,9 +202,16 @@ function processStrings (file, filename) {
       // }
     }
     if (options[0]) {
-      newfilename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_stringnamesTokens.strings')
+      newfilename = filename.replace(/([A-Za-z0-9_]+)_en_v(?:.*).strings/, '$1_stringnamesTokens.strings')
+      if (newfilename === filename) {
+        newfilename = filename.replace(/(.*).strings/, '$1_stringnamesTokens.strings') // just append at end
+      }
     } else {
       newfilename = filename.replace(/(macos|ios|tdesktop)(?:.*).strings/, '$1_stringnames.strings')
+      newfilename = filename.replace(/([A-Za-z0-9_]+)_en_v(?:.*).strings/, '$1_stringnames.strings')
+      if (newfilename === filename) {
+        newfilename = filename.replace(/(.*).strings/, '$1_stringnames.strings') // just append at end
+      }
     }
     var bb = new Blob([text], { type: 'text/strings' });
     prepareDownload(bb, filename, newfilename)

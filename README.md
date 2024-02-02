@@ -1,4 +1,4 @@
-# NOTE: USE THIS WEBSITE FROM NOW: https://rondevous.github.io/stringnames/
+# NOTE: USE THIS WEBSITE: https://rondevous.github.io/stringnames/
 The python script will not be updated, unless necessary. The website processes all the stringnames in your browser itself, so its fast :thumbsup:
 
 ---
